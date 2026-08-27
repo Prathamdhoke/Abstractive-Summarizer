@@ -1,72 +1,243 @@
-# Summarizer-HF
+<div align="center">
 
-Abstractive text summarization powered by a fine-tuned T5 model, served with
-FastAPI. Paste text or drop in a `.txt` / `.pdf` / `.docx` file and get a
-summary with word-count and reduction stats — history is kept client-side
-only, in the browser.
+# Summarizer‑HF
 
-## Project layout
+**An abstractive text summarization web app powered by a fine‑tuned T5 model, served through a FastAPI backend.**
+
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![Hugging Face](https://img.shields.io/badge/🤗%20Transformers-T5-yellow)](https://huggingface.co/docs/transformers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#license)
+
+[Overview](#overview) • [Features](#features) • [Architecture](#architecture) • [Getting Started](#getting-started) • [API Reference](#api-reference) • [Roadmap](#roadmap)
+
+</div>
+
+## Overview
+
+Summarizer‑HF is a full‑stack NLP application that turns long‑form text or documents into concise, readable summaries. It combines a fine‑tuned **T5** model with a lightweight **FastAPI** backend and a responsive vanilla‑JS frontend, so users can paste text or upload a file and get a summary — along with reduction statistics and estimated reading time saved — in seconds.
+
+The project demonstrates an end‑to‑end machine learning product: model integration and inference, a typed REST API, file parsing for multiple document formats, and a polished, dependency‑free frontend.
+
+## Features
+
+- **Abstractive summarization** using a fine‑tuned T5 model (not just extractive sentence selection)
+- **Multiple input methods** — paste text directly, or upload `.txt`, `.pdf`, or `.docx` files
+- **Configurable summary length** — short, medium, and long presets
+- **Robust input handling** — validation and configurable file‑size limits
+- **Rich summary statistics**
+  - Original and summary word counts
+  - Character counts
+  - Reduction percentage
+  - Estimated reading time saved
+- **Export options** — copy to clipboard or download as `.txt`
+- **Polished UI** — responsive two‑pane layout with light and dark themes
+- **Local session history** — up to 20 recent summaries, stored client‑side only
+- **Production‑readiness basics** — health‑check endpoint reporting model status and device (CPU/GPU)
+
+## Architecture
 
 ```
+┌─────────────────┐      HTTP/JSON       ┌──────────────────────┐
+│  Frontend (JS)   │ ───────────────────▶ │   FastAPI Backend    │
+│  templates/      │ ◀─────────────────── │   app/main.py         │
+│  static/         │                      └──────────┬───────────┘
+└─────────────────┘                                  │
+                                                       ▼
+                                          ┌────────────────────────┐
+                                          │  Extraction Layer       │
+                                          │  app/extractors.py      │
+                                          │  (TXT / PDF / DOCX)     │
+                                          └────────────┬────────────┘
+                                                       │
+                                                       ▼
+                                          ┌────────────────────────┐
+                                          │  Inference Layer        │
+                                          │  app/summarizer.py      │
+                                          │  Fine‑tuned T5 (PyTorch)│
+                                          └────────────────────────┘
+```
+
+**Tech stack**
+
+| Layer | Technologies |
+|---|---|
+| Backend | FastAPI, Uvicorn, Pydantic |
+| Machine Learning | PyTorch, Hugging Face Transformers, T5 |
+| Frontend | HTML, CSS, vanilla JavaScript (no framework overhead) |
+| Document parsing | PyPDF, python‑docx |
+
+## Project Structure
+
+```text
 summarizer/
 ├── app/
-│   ├── main.py          # FastAPI routes, startup hook, response shaping
-│   ├── config.py         # settings (env-var overridable)
-│   ├── schemas.py        # request/response models
-│   ├── summarizer.py     # model load + generation
-│   └── extractors.py     # .txt/.pdf/.docx -> plain text
-├── templates/
-│   └── index.html
+│   ├── main.py          # FastAPI routes and application setup
+│   ├── config.py        # Environment-based configuration
+│   ├── schemas.py        # Request and response schemas
+│   ├── summarizer.py    # T5 model loading and inference
+│   └── extractors.py    # TXT, PDF, and DOCX text extraction
 ├── static/
-│   ├── css/style.css
-│   └── js/app.js
+│   ├── css/style.css    # Application styles
+│   └── js/app.js        # Client-side interaction logic
+├── templates/
+│   └── index.html       # Main user interface
+├── saved_summary_model/ # Local fine-tuned model files (not committed)
 ├── requirements.txt
 ├── .env.example
 └── run.py
 ```
 
-## Setup
+## Getting Started
 
-1. Place your fine-tuned model + tokenizer files where `SUMMARIZER_MODEL_NAME`
-   points (defaults to `./saved_summary_model`, same as v1).
-2. Install dependencies:
+### Prerequisites
+
+- Python 3.10 or later
+- A saved T5 model and tokenizer, either:
+  - in the local `saved_summary_model/` folder, or
+  - hosted in a Hugging Face model repository
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/summarizer-hf.git
+   cd summarizer-hf
+   ```
+
+2. **Create and activate a virtual environment**
+
+   ```bash
+   python -m venv venv
+   ```
+
+   **Windows**
+   ```bash
+   venv\Scripts\activate
+   ```
+
+   **macOS/Linux**
+   ```bash
+   source venv/bin/activate
+   ```
+
+3. **Install dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
-3. Run it:
+
+4. **Create your environment file**
+
+   Windows:
+   ```bash
+   copy .env.example .env
+   ```
+   macOS/Linux:
+   ```bash
+   cp .env.example .env
+   ```
+
+5. **Configure the model path** in `.env`
+
+   ```env
+   SUMMARIZER_MODEL_NAME=./saved_summary_model
+   ```
+
+   Or point to a Hugging Face model repository:
+
+   ```env
+   SUMMARIZER_MODEL_NAME=your-username/your-model-name
+   ```
+
+6. **Start the application**
+
    ```bash
    python run.py
-   # or: uvicorn app.main:app --host 0.0.0.0 --port 8000
    ```
-4. Open `http://localhost:8000`.
 
-## API
+7. Open [http://localhost:8000](http://localhost:8000) in your browser.
 
-- `GET /health` → `{status, model, device}` — `status` is `"loading"` until
-  the model finishes loading in the background at startup.
-- `POST /api/summarize` → body `{text, length}` (`length` is
-  `short` | `medium` | `long`), returns the summary plus word/char counts,
-  reduction percentage, and estimated reading time saved.
-- `POST /api/summarize-file` → multipart form with `file` and `length`,
-  same response shape. Accepts `.txt`, `.pdf`, `.docx` up to
-  `SUMMARIZER_MAX_UPLOAD_MB` (default 10MB).
+## Configuration
 
-Config knobs (`SUMMARIZER_MODEL_NAME`, `SUMMARIZER_MAX_INPUT_CHARS`,
-`SUMMARIZER_MAX_UPLOAD_MB`) can be set via environment or a `.env` file —
-see `.env.example`.
+All settings are configurable via environment variables.
 
-## What changed from v1
+| Variable | Default | Description |
+|---|---:|---|
+| `SUMMARIZER_MODEL_NAME` | `./saved_summary_model` | Local model path or Hugging Face model ID |
+| `SUMMARIZER_MAX_INPUT_CHARS` | `20000` | Maximum characters accepted for summarization |
+| `SUMMARIZER_MAX_UPLOAD_MB` | `10` | Maximum upload size in MB |
 
-- Split the single `app.py` into a proper `app/` package (config, schemas,
-  summarizer, extractors, routes) instead of one file mixing model loading,
-  request handling, and templating.
-- Model now loads once at startup in a background thread instead of at
-  import time, and `/health` reports whether it's ready.
-- Fixed a crash-on-CPU bug (`torch.cuda.is_availanle` typo) and added an
-  `.eval()` + `torch.no_grad()` around generation.
-- Added file upload (`.txt`/`.pdf`/`.docx`) alongside pasted text, with
-  size/type validation.
-- Length presets (short/medium/long) drive `min_length`/`max_length` instead
-  of a single fixed length.
-- New UI: word/char stats, a reduction-percent ring, copy/download actions,
-  session history (stored in the browser only), and light/dark themes.
+## API Reference
+
+### Health Check
+
+```http
+GET /health
+```
+
+Example response:
+
+```json
+{
+  "status": "ok",
+  "model": "./saved_summary_model",
+  "device": "cpu"
+}
+```
+
+`status` is `loading` while the model initializes and `ok` once it's ready — useful for readiness probes in a container or orchestration environment.
+
+### Summarize Text
+
+```http
+POST /api/summarize
+Content-Type: application/json
+```
+
+Request body:
+
+```json
+{
+  "text": "Your text to summarize goes here.",
+  "length": "medium"
+}
+```
+
+Available values for `length`: `short`, `medium`, `long`
+
+### Summarize a File
+
+```http
+POST /api/summarize-file
+Content-Type: multipart/form-data
+```
+
+Form fields:
+
+- `file` — a `.txt`, `.pdf`, or `.docx` file
+- `length` — `short`, `medium`, or `long`
+
+Example response:
+
+```json
+{
+  "summary": "Generated summary text.",
+  "original_word_count": 420,
+  "summary_word_count": 75,
+  "original_char_count": 2500,
+  "summary_char_count": 460,
+  "reduction_percent": 82.1,
+  "estimated_reading_time_saved_sec": 104
+}
+```
+
+## Notes
+
+- The model loads once when the application starts, avoiding per‑request load latency.
+- PDF extraction supports text‑based PDFs; scanned‑image PDFs require OCR, which is not currently implemented.
+- Uploaded files are processed only to generate a summary; session history is stored client‑side in the browser and never persisted server‑side.
+- The model directory is intentionally excluded from version control, since model‑weight files can exceed GitHub's file‑size limits. Store weights separately or publish them to a Hugging Face model repository.
+
