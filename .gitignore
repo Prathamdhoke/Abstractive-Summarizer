@@ -1,0 +1,41 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# --- Virtual environments ---
+venv/
+.venv/
+env/
+ENV/
+
+# --- Environment / secrets ---
+.env
+.env.local
+
+# --- Model weights (large binary files — don't commit these) ---
+saved_summary_model/
+results/
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# --- Training data (large CSVs — don't commit these either) ---
+*.csv
+
+# --- Editors / IDEs ---
+.vscode/
+.idea/
+*.swp
+
+# --- OS cruft ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
