@@ -1,19 +1,3 @@
-<div align="center">
-
-# Summarizer‑HF
-
-**An abstractive text summarization web app powered by a fine‑tuned T5 model, served through a FastAPI backend.**
-
-[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
-[![Hugging Face](https://img.shields.io/badge/🤗%20Transformers-T5-yellow)](https://huggingface.co/docs/transformers)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#license)
-
-[Overview](#overview) • [Features](#features) • [Architecture](#architecture) • [Getting Started](#getting-started) • [API Reference](#api-reference) • [Roadmap](#roadmap)
-
-</div>
-
 ## Overview
 
 Summarizer‑HF is a full‑stack NLP application that turns long‑form text or documents into concise, readable summaries. It combines a fine‑tuned **T5** model with a lightweight **FastAPI** backend and a responsive vanilla‑JS frontend, so users can paste text or upload a file and get a summary — along with reduction statistics and estimated reading time saved — in seconds.
